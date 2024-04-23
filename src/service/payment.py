@@ -52,7 +52,7 @@ class PaymentService:
                 return False, err
             
             success, _ = self.db_session.update("orders", {
-                "payment_id": payment_intent.metadata.order_id
+                "payment_id": ObjectId(payment_intent.metadata.order_id)
             }, {
                 "status": "paid"
             })
