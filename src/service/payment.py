@@ -42,6 +42,7 @@ class PaymentService:
             payment_intent = event_dict['data']['object']
             success, err = self.db_session.insert("payments", {
                 "user_id": payment_intent.metadata.user_id,
+                "order_id": payment_intent.metadata.order_id,
                 "amount": payment_intent.amount,
                 "currency": payment_intent.currency,
                 "status": payment_intent.status,
@@ -49,6 +50,15 @@ class PaymentService:
             })
             if not success:
                 return False, err
+            
+            success, _ = self.db_session.update("orders", {
+                "payment_id": payment_intent.metadata.order_id
+            }, {
+                "status": "paid"
+            })
+
+            if not success:
+                return False, "Error updating order status"
 
             print(f"PaymentIntent was successful: {payment_intent.id}")
         elif event_dict['type'] == 'payment_intent.payment_failed':
